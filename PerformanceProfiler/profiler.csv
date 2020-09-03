@@ -12,3 +12,10 @@ TimeFunc2,0.100727§Á, 0.100774§Á, 0.100682§Á, 196
 TagName,Average,Max,Min,Call 
 TimeFunc,0.200321§Á, 0.201013§Á, 0.200137§Á, 196
 TimeFunc2,0.100729§Á, 0.100792§Á, 0.100668§Á, 196
+TagName,Average,Max,Min,Call 
+TimeFunc,0.000000§Á, 0.000000§Á, 0.000000§Á, 196
+TimeFunc2,0.000000§Á, 0.000000§Á, 0.000000§Á, 196
+TagName,Average,Max,Min,Call 
+TimeFunc,0.000000§Á, 0.201015§Á, 0.200132§Á, 196
+TagName,Average,Max,Min,Call 
+TimeFunc,0.200264§Á, 0.200468§Á, 0.200112§Á, 196

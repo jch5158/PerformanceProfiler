@@ -128,10 +128,10 @@ void PrintPerformance(void)
 			performanceInfo->totalTIme -= performanceInfo->min[iCntM];
 		}
 
-		avgTime = (double)(((double)performanceInfo->totalTIme / (double)performanceInfo->callCount) / (double)frequencyCount.QuadPart);
+		avgTime = ((double)(performanceInfo->totalTIme / (double)performanceInfo->callCount)) / (double)frequencyCount.QuadPart;
 
-		max = (double)((double)performanceInfo->max[1] / (double)frequencyCount.QuadPart);
-		min = (double)((double)performanceInfo->min[1] / (double)frequencyCount.QuadPart);
+		max = (double)performanceInfo->max[1] / (double)frequencyCount.QuadPart;
+		min = (double)performanceInfo->min[1] / (double)frequencyCount.QuadPart;
 
 		fwprintf(fp, L"%s,", functionNameList[iCnt]);
 

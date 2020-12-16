@@ -1,6 +1,6 @@
 #pragma once
 
-#define FUNCTION_NAME_SIZE 50
+//#define FUNCTION_NAME_SIZE 50
 
 #define FUNCTION_COUNT 100
 
@@ -12,41 +12,37 @@ public:
 
 	~CPerformanceProfiler(void);
 
-	friend void PrintPerformance(void);
+	static bool PrintPerformance(void);
 
 	// 태그 성능 정보.
 	struct stPerformanceInfo
 	{
+
 		// 최대로 걸린시간.
-		long long max[2];
+		long long maxTime[2] = { 0, };
 
 		// 최소로 걸린시간.
-		long long min[2];
+		long long minTime[2] = { 0, };
 
 		// 시작 시간.
-		LARGE_INTEGER startTime;
+		LARGE_INTEGER startTime = { 0, };
 
 		// 호출 횟수.
-		int callCount;
+		long long callCount = 0;
 
 		// 함수의 누적 로직 시간
-		long long totalTIme;
-
+		// 평균 로직 시간을 구할 때 사용함
+		long long totalTIme = 0;
 	};
 
 private:	
 
-	stPerformanceInfo* RegisterFunction(const WCHAR* funcName);
+	// 이름이 없으면 저장
+	stPerformanceInfo* findFunctionPerformance(const WCHAR* funcName);
 
-	void UpdateFunctionPerformance(stPerformanceInfo* performanceInfo);
+	void updateFunctionPerformance(stPerformanceInfo* performanceInfo);
 
 	WCHAR *mFunctionName;
+
+	static std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> performanceInfoMap;
 };
-
-void PrintPerformance(void);
-
-static WCHAR *functionNameList[FUNCTION_COUNT];
-
-static int functionCout;
-
-static std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> performanceInfoMap;

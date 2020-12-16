@@ -5,12 +5,14 @@ void TimeFunc()
 {
 	CPerformanceProfiler profiler(L"TimeFunc");
 
-	Sleep(200);
+	Sleep(20);
 }
 
 
 int wmain()
 {
+	_wsetlocale(LC_ALL, L"");
+
 	timeBeginPeriod(1);
 
 
@@ -20,7 +22,7 @@ int wmain()
 		printf_s("%d\n", iCnt + 1);
 	}
 
-	PrintPerformance();
+	CPerformanceProfiler::PrintPerformance();
 
 
 	timeEndPeriod(1);

@@ -1,21 +1,16 @@
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200299§Á, 0.200426§Á, 0.200115§Á, 96
+TimeFunc,0.0205725§Á, 0.0228602§Á, 0.0200594§Á, 196
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200290§Á, 0.200378§Á, 0.200079§Á, 96
+TimeFunc,0.0205435§Á, 0.0213243§Á, 0.0200322§Á, 196
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200299§Á, 0.201064§Á, 0.200094§Á, 196
+TimeFunc,0.0205413§Á, 0.0213574§Á, 0.0200441§Á, 196
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200332§Á, 0.201049§Á, 0.200095§Á, 196
+TimeFunc,0.0205143§Á, 0.0226458§Á, 0.0200147§Á, 196
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200272§Á, 0.200428§Á, 0.200131§Á, 196
-TimeFunc2,0.100727§Á, 0.100774§Á, 0.100682§Á, 196
+TimeFunc,0.0205254§Á, 0.0218947§Á, 0.0200515§Á, 196
 TagName,Average,Max,Min,Call 
-TimeFunc,0.200321§Á, 0.201013§Á, 0.200137§Á, 196
-TimeFunc2,0.100729§Á, 0.100792§Á, 0.100668§Á, 196
-TagName,Average,Max,Min,Call 
-TimeFunc,0.000000§Á, 0.000000§Á, 0.000000§Á, 196
-TimeFunc2,0.000000§Á, 0.000000§Á, 0.000000§Á, 196
-TagName,Average,Max,Min,Call 
-TimeFunc,0.000000§Á, 0.201015§Á, 0.200132§Á, 196
-TagName,Average,Max,Min,Call 
-TimeFunc,0.200264§Á, 0.200468§Á, 0.200112§Á, 196
+TimeFunc,0.0204940§Á, 0.0211895§Á, 0.0200353§Á, 196
+FunctionName,Average,Max,Min,Call 
+TimeFunc,0.0204488§Á, 0.0217152§Á, 0.0200776§Á, 196
+FunctionName,Average,Max,Min,Call 
+TimeFunc,0.0204395§Á, 0.0210751§Á, 0.0200249§Á, 196

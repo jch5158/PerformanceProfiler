@@ -17,32 +17,31 @@ public:
 	// 태그 성능 정보.
 	struct stPerformanceInfo
 	{
-
-		// 최대로 걸린시간.
-		long long maxTime[2] = { 0, };
-
-		// 최소로 걸린시간.
-		long long minTime[2] = { 0, };
-
-		// 시작 시간.
-		LARGE_INTEGER startTime = { 0, };
-
 		// 호출 횟수.
-		long long callCount = 0;
+		long long callCount;
 
 		// 함수의 누적 로직 시간
 		// 평균 로직 시간을 구할 때 사용함
-		long long totalTIme = 0;
+		long long totalTIme;
+
+		// 시작 시간.
+		LARGE_INTEGER startTime;
+
+		// 최대로 걸린시간.
+		long long maxTime[2];
+
+		// 최소로 걸린시간.
+		long long minTime[2];
 	};
 
-private:	
+private:
 
 	// 이름이 없으면 저장
 	stPerformanceInfo* findFunctionPerformance(const WCHAR* funcName);
 
 	void updateFunctionPerformance(stPerformanceInfo* performanceInfo);
 
-	WCHAR *mFunctionName;
+	WCHAR* mFunctionName;
 
 	static std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> performanceInfoMap;
 };

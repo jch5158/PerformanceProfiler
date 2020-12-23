@@ -5,10 +5,10 @@
 std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> CPerformanceProfiler::performanceInfoMap;
 
 CPerformanceProfiler::CPerformanceProfiler(const WCHAR* funcName)
-{	
+{
 	stPerformanceInfo* performanceInfo;
 
-	performanceInfo = findFunctionPerformance(funcName);	
+	performanceInfo = findFunctionPerformance(funcName);
 	if (performanceInfo == nullptr)
 	{
 		return;
@@ -19,7 +19,7 @@ CPerformanceProfiler::CPerformanceProfiler(const WCHAR* funcName)
 
 CPerformanceProfiler::~CPerformanceProfiler(void)
 {
-	LARGE_INTEGER endTime;
+	LARGE_INTEGER endTime = { 0, };
 
 	QueryPerformanceCounter(&endTime);
 
@@ -60,9 +60,11 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 	{
 		return findIter->second;
 	}
-	
+
 	stPerformanceInfo* performanceInfo = (stPerformanceInfo*)malloc(sizeof(stPerformanceInfo));
-			
+
+	ZeroMemory(performanceInfo, sizeof(stPerformanceInfo));
+
 	performanceInfo->maxTime[0] = 0;
 	performanceInfo->maxTime[1] = 0;
 	performanceInfo->minTime[0] = LLONG_MAX;
@@ -71,7 +73,7 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 	performanceInfo->callCount += 1;
 
 	performanceInfoMap.insert(std::pair<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>(mFunctionName, performanceInfo));
-	
+
 	QueryPerformanceCounter(&performanceInfo->startTime);
 
 	return nullptr;
@@ -80,7 +82,7 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 void CPerformanceProfiler::updateFunctionPerformance(stPerformanceInfo* performanceInfo)
 {
 	performanceInfo->callCount += 1;
-	
+
 	QueryPerformanceCounter(&performanceInfo->startTime);
 }
 
@@ -107,10 +109,10 @@ bool CPerformanceProfiler::PrintPerformance(void)
 	double minTime = NULL;
 
 	CPerformanceProfiler::stPerformanceInfo* performanceInfo = nullptr;
-	
+
 	auto iterE = performanceInfoMap.end();
 	for (auto iter = performanceInfoMap.begin(); iter != iterE; ++iter)
-	{		
+	{
 		performanceInfo = iter->second;
 
 		// 최소 콜은 4개 이상이여야 한다.
@@ -132,9 +134,9 @@ bool CPerformanceProfiler::PrintPerformance(void)
 		maxTime = (double)performanceInfo->maxTime[1] / (double)frequencyCount.QuadPart;
 		minTime = (double)performanceInfo->minTime[1] / (double)frequencyCount.QuadPart;
 
-		fwprintf_s(fp,L"%s,", iter->first);
+		fwprintf_s(fp, L"%s,", iter->first);
 
-		fwprintf_s(fp, L"%.7lf㎲, %.7lf㎲, %.7lf㎲, %lld\n",avgTime, maxTime, minTime, performanceInfo->callCount);
+		fwprintf_s(fp, L"%.7lf㎲, %.7lf㎲, %.7lf㎲, %lld\n", avgTime, maxTime, minTime, performanceInfo->callCount);
 
 		free(iter->second);
 	}

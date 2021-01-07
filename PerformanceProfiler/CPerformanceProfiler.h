@@ -2,21 +2,28 @@
 
 //#define FUNCTION_NAME_SIZE 50
 
-#define FUNCTION_COUNT 100
+//#define FUNCTION_COUNT 100
 
 
 class CPerformanceProfiler
 {
 public:
+
 	CPerformanceProfiler(const WCHAR* functionName);
 
 	~CPerformanceProfiler(void);
 
 	static bool PrintPerformance(void);
 
+	static bool SetPerformanceProfiler(int threadCount);
+
+	static bool FreePerformanceProfiler(void);
+
+private:
+
 	// 태그 성능 정보.
 	struct stPerformanceInfo
-	{
+	{	
 		// 호출 횟수.
 		long long callCount;
 
@@ -34,14 +41,28 @@ public:
 		long long minTime[2];
 	};
 
-private:
+	
+	struct stThreadPerformanceSample
+	{
+		DWORD mThreadId;
+
+		std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> mPerformanceInfoMap;
+	};
+
 
 	// 이름이 없으면 저장
 	stPerformanceInfo* findFunctionPerformance(const WCHAR* funcName);
 
 	void updateFunctionPerformance(stPerformanceInfo* performanceInfo);
 
+	static bool setTlsIndex(void);
+
+	static bool freeTlsIndex(void);
+
+	
 	WCHAR* mFunctionName;
 
-	static std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> performanceInfoMap;
+	static std::vector<stThreadPerformanceSample*> mThreadPerformanceSampleArray;
+
+	static int mTlsIndex;
 };

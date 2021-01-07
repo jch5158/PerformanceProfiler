@@ -15,6 +15,7 @@ int wmain()
 
 	timeBeginPeriod(1);
 
+	CPerformanceProfiler::SetPerformanceProfiler(3);
 
 	for (int iCnt = 0; iCnt < 200; ++iCnt)
 	{
@@ -23,6 +24,8 @@ int wmain()
 	}
 
 	CPerformanceProfiler::PrintPerformance();
+
+	CPerformanceProfiler::FreePerformanceProfiler();
 
 
 	timeEndPeriod(1);

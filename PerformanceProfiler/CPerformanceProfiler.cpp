@@ -2,11 +2,17 @@
 #include "CPerformanceProfiler.h"
 
 
-std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> CPerformanceProfiler::performanceInfoMap;
+//std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> CPerformanceProfiler::performanceInfoMap;
+
+
+int CPerformanceProfiler::mTlsIndex = -1;
+
+std::vector<CPerformanceProfiler::stThreadPerformanceSample*> CPerformanceProfiler::mThreadPerformanceSampleArray;
+
 
 CPerformanceProfiler::CPerformanceProfiler(const WCHAR* funcName)
 {
-	stPerformanceInfo* performanceInfo;
+	stPerformanceInfo* performanceInfo = nullptr;
 
 	performanceInfo = findFunctionPerformance(funcName);
 	if (performanceInfo == nullptr)
@@ -23,7 +29,13 @@ CPerformanceProfiler::~CPerformanceProfiler(void)
 
 	QueryPerformanceCounter(&endTime);
 
-	stPerformanceInfo* performanceInfo = performanceInfoMap.find(mFunctionName)->second;
+	stThreadPerformanceSample* pThreadPerformanceSample = (stThreadPerformanceSample*)TlsGetValue(mTlsIndex);
+
+	std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>* pPerformanceInfoMap = nullptr;
+
+	pPerformanceInfoMap = &pThreadPerformanceSample->mPerformanceInfoMap;
+
+	stPerformanceInfo* performanceInfo = pPerformanceInfoMap->find(mFunctionName)->second;
 
 	long long logicTime = NULL;
 
@@ -45,23 +57,45 @@ CPerformanceProfiler::~CPerformanceProfiler(void)
 	}
 
 	performanceInfo->totalTIme += logicTime;
+
+	performanceInfo->callCount += 1;
 }
 
 
 CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerformance(const WCHAR* funcName)
 {
-	auto iterE = performanceInfoMap.end();
+	stThreadPerformanceSample* pThreadPerformanceSample = nullptr;
+		
+	pThreadPerformanceSample = (stThreadPerformanceSample*)TlsGetValue(mTlsIndex);
+	
+	if (pThreadPerformanceSample == nullptr)
+	{
+		static long threadIndex = -1;
+
+		pThreadPerformanceSample = new stThreadPerformanceSample;
+
+		pThreadPerformanceSample->mThreadId = GetCurrentThreadId();
+	
+		mThreadPerformanceSampleArray[InterlockedIncrement(&threadIndex)] = pThreadPerformanceSample;
+
+		TlsSetValue(mTlsIndex, (LPVOID*)pThreadPerformanceSample);
+	}
+
+	std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> *pPerformanceInfoMap = nullptr;
+	pPerformanceInfoMap = &pThreadPerformanceSample->mPerformanceInfoMap;
+
+	auto iterE = pPerformanceInfoMap->end();
 
 	mFunctionName = (WCHAR*)funcName;
 
-	auto findIter = performanceInfoMap.find(mFunctionName);
+	auto findIter = pPerformanceInfoMap->find(mFunctionName);
 
 	if (iterE != findIter)
 	{
 		return findIter->second;
 	}
 
-	stPerformanceInfo* performanceInfo = (stPerformanceInfo*)malloc(sizeof(stPerformanceInfo));
+	stPerformanceInfo* performanceInfo = new stPerformanceInfo;
 
 	ZeroMemory(performanceInfo, sizeof(stPerformanceInfo));
 
@@ -70,9 +104,7 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 	performanceInfo->minTime[0] = LLONG_MAX;
 	performanceInfo->minTime[1] = LLONG_MAX;
 
-	performanceInfo->callCount += 1;
-
-	performanceInfoMap.insert(std::pair<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>(mFunctionName, performanceInfo));
+	pPerformanceInfoMap->insert(std::pair<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>(mFunctionName, performanceInfo));
 
 	QueryPerformanceCounter(&performanceInfo->startTime);
 
@@ -81,10 +113,99 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 
 void CPerformanceProfiler::updateFunctionPerformance(stPerformanceInfo* performanceInfo)
 {
-	performanceInfo->callCount += 1;
-
 	QueryPerformanceCounter(&performanceInfo->startTime);
 }
+
+
+
+
+bool CPerformanceProfiler::setTlsIndex(void)
+{
+	if (mTlsIndex != -1)
+	{
+		return false;
+	}
+
+	mTlsIndex = TlsAlloc();
+	if (mTlsIndex == TLS_OUT_OF_INDEXES)
+	{
+		wprintf(L"TlsAlloc() Error Value : %d\n", GetLastError());
+
+		return false;
+	}
+
+	return true;
+}
+
+bool CPerformanceProfiler::SetPerformanceProfiler(int threadCount)
+{
+	if (setTlsIndex() == false)
+	{
+		return false;
+	}
+
+	mThreadPerformanceSampleArray.resize(threadCount);
+
+	return true;
+}
+
+
+bool CPerformanceProfiler::freeTlsIndex(void)
+{
+
+	if (mTlsIndex == -1)
+	{
+		return false;
+	}
+
+	if (TlsFree(mTlsIndex) == false)
+	{
+		wprintf(L"TlsFree() Error Value : %d\n", GetLastError());
+
+		return false;
+	}
+
+	return true;
+}
+
+
+bool CPerformanceProfiler::FreePerformanceProfiler()
+{
+	if (freeTlsIndex() == false)
+	{
+		return false;
+	}
+
+	auto threadIterE = mThreadPerformanceSampleArray.end();
+
+	for(auto threadIter = mThreadPerformanceSampleArray.begin(); threadIter != threadIterE;)
+	{
+		if (*threadIter == nullptr)
+		{
+			break;
+		}
+
+		std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>* pPerformanceInfoMap = &(*threadIter)->mPerformanceInfoMap;	
+
+		auto iterE = pPerformanceInfoMap->end();
+
+		for (auto iter = pPerformanceInfoMap->begin(); iter != iterE;)
+		{
+			delete iter->second;
+
+			iter = pPerformanceInfoMap->erase(iter);
+		}	
+
+		delete* threadIter;
+
+		threadIter = mThreadPerformanceSampleArray.erase(threadIter);
+	}
+
+	mThreadPerformanceSampleArray.clear();
+
+}
+
+
 
 bool CPerformanceProfiler::PrintPerformance(void)
 {
@@ -101,47 +222,49 @@ bool CPerformanceProfiler::PrintPerformance(void)
 	}
 
 	// 열 출력.
-	fwprintf_s(fp, L"FunctionName,Average,Max,Min,Call \n");
+	fwprintf_s(fp, L"Thread ID,FunctionName,Average,Max,Min,Call \n");
 
 	double avgTime = NULL;
 
 	double maxTime = NULL;
+	
 	double minTime = NULL;
 
-	CPerformanceProfiler::stPerformanceInfo* performanceInfo = nullptr;
+	stPerformanceInfo* performanceInfo = nullptr;
 
-	auto iterE = performanceInfoMap.end();
-	for (auto iter = performanceInfoMap.begin(); iter != iterE; ++iter)
+	for (stThreadPerformanceSample* pThreadPerformanceSample : mThreadPerformanceSampleArray)
 	{
-		performanceInfo = iter->second;
-
-		// 최소 콜은 4개 이상이여야 한다.
-		if (performanceInfo->callCount <= 4)
+		if (pThreadPerformanceSample == nullptr)
 		{
-			continue;
+			break;
 		}
 
-		performanceInfo->callCount -= 4;
-
-		for (int iCntM = 0; iCntM < 2; ++iCntM)
+		for (auto iter : pThreadPerformanceSample->mPerformanceInfoMap)
 		{
-			performanceInfo->totalTIme -= performanceInfo->maxTime[iCntM];
-			performanceInfo->totalTIme -= performanceInfo->minTime[iCntM];
+			performanceInfo = iter.second;
+
+			// 최소 콜은 4개 이상이여야 한다.
+			if (performanceInfo->callCount <= 4)
+			{
+				continue;
+			}
+
+			performanceInfo->callCount -= 2;
+
+			performanceInfo->totalTIme -= performanceInfo->maxTime[0];
+			performanceInfo->totalTIme -= performanceInfo->minTime[0];
+
+
+			avgTime = ((double)(performanceInfo->totalTIme / (double)performanceInfo->callCount)) / (double)frequencyCount.QuadPart;
+
+			maxTime = (double)performanceInfo->maxTime[1] / (double)frequencyCount.QuadPart;
+			minTime = (double)performanceInfo->minTime[1] / (double)frequencyCount.QuadPart;
+
+
+			fwprintf_s(fp, L"%d, %s,%.6lf㎲, %.6lf㎲, %.6lf㎲, %lld\n", pThreadPerformanceSample->mThreadId, iter.first, avgTime, maxTime, minTime, performanceInfo->callCount);
+
 		}
-
-		avgTime = ((double)(performanceInfo->totalTIme / (double)performanceInfo->callCount)) / (double)frequencyCount.QuadPart;
-
-		maxTime = (double)performanceInfo->maxTime[1] / (double)frequencyCount.QuadPart;
-		minTime = (double)performanceInfo->minTime[1] / (double)frequencyCount.QuadPart;
-
-		fwprintf_s(fp, L"%s,", iter->first);
-
-		fwprintf_s(fp, L"%.7lf㎲, %.7lf㎲, %.7lf㎲, %lld\n", avgTime, maxTime, minTime, performanceInfo->callCount);
-
-		free(iter->second);
 	}
-
-	performanceInfoMap.clear();
 
 	// 파일 닫기.
 	fclose(fp);

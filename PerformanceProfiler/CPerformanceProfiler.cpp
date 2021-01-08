@@ -2,8 +2,6 @@
 #include "CPerformanceProfiler.h"
 
 
-//std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> CPerformanceProfiler::performanceInfoMap;
-
 
 int CPerformanceProfiler::mTlsIndex = -1;
 
@@ -59,6 +57,8 @@ CPerformanceProfiler::~CPerformanceProfiler(void)
 	performanceInfo->totalTIme += logicTime;
 
 	performanceInfo->callCount += 1;
+
+	ReleaseSRWLockExclusive(&pThreadPerformanceSample->mSrwLock);
 }
 
 
@@ -66,8 +66,7 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 {
 	stThreadPerformanceSample* pThreadPerformanceSample = nullptr;
 		
-	pThreadPerformanceSample = (stThreadPerformanceSample*)TlsGetValue(mTlsIndex);
-	
+	pThreadPerformanceSample = (stThreadPerformanceSample*)TlsGetValue(mTlsIndex);	
 	if (pThreadPerformanceSample == nullptr)
 	{
 		static long threadIndex = -1;
@@ -75,11 +74,15 @@ CPerformanceProfiler::stPerformanceInfo* CPerformanceProfiler::findFunctionPerfo
 		pThreadPerformanceSample = new stThreadPerformanceSample;
 
 		pThreadPerformanceSample->mThreadId = GetCurrentThreadId();
+
+		InitializeSRWLock(&pThreadPerformanceSample->mSrwLock);
 	
 		mThreadPerformanceSampleArray[InterlockedIncrement(&threadIndex)] = pThreadPerformanceSample;
 
 		TlsSetValue(mTlsIndex, (LPVOID*)pThreadPerformanceSample);
 	}
+
+	AcquireSRWLockExclusive(&pThreadPerformanceSample->mSrwLock);
 
 	std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> *pPerformanceInfoMap = nullptr;
 	pPerformanceInfoMap = &pThreadPerformanceSample->mPerformanceInfoMap;
@@ -176,16 +179,15 @@ bool CPerformanceProfiler::FreePerformanceProfiler()
 		return false;
 	}
 
-	auto threadIterE = mThreadPerformanceSampleArray.end();
-
-	for(auto threadIter = mThreadPerformanceSampleArray.begin(); threadIter != threadIterE;)
+	auto threadIter = mThreadPerformanceSampleArray.begin();
+	for(int index = 0; index < mThreadPerformanceSampleArray.size();)
 	{
 		if (*threadIter == nullptr)
 		{
 			break;
 		}
 
-		std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>* pPerformanceInfoMap = &(*threadIter)->mPerformanceInfoMap;	
+		std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*>* pPerformanceInfoMap = &(*threadIter)->mPerformanceInfoMap;
 
 		auto iterE = pPerformanceInfoMap->end();
 
@@ -196,13 +198,15 @@ bool CPerformanceProfiler::FreePerformanceProfiler()
 			iter = pPerformanceInfoMap->erase(iter);
 		}	
 
-		delete* threadIter;
 
-		threadIter = mThreadPerformanceSampleArray.erase(threadIter);
+		delete *threadIter;
+
+		mThreadPerformanceSampleArray.erase(threadIter);
 	}
 
 	mThreadPerformanceSampleArray.clear();
 
+	return true;
 }
 
 
@@ -239,6 +243,8 @@ bool CPerformanceProfiler::PrintPerformance(void)
 			break;
 		}
 
+		AcquireSRWLockExclusive(&pThreadPerformanceSample->mSrwLock);
+
 		for (auto iter : pThreadPerformanceSample->mPerformanceInfoMap)
 		{
 			performanceInfo = iter.second;
@@ -248,22 +254,23 @@ bool CPerformanceProfiler::PrintPerformance(void)
 			{
 				continue;
 			}
-
-			performanceInfo->callCount -= 2;
-
+		
 			performanceInfo->totalTIme -= performanceInfo->maxTime[0];
 			performanceInfo->totalTIme -= performanceInfo->minTime[0];
 
 
-			avgTime = ((double)(performanceInfo->totalTIme / (double)performanceInfo->callCount)) / (double)frequencyCount.QuadPart;
+			avgTime = ((double)(performanceInfo->totalTIme / (double)performanceInfo->callCount-2)) / (double)frequencyCount.QuadPart;
 
 			maxTime = (double)performanceInfo->maxTime[1] / (double)frequencyCount.QuadPart;
 			minTime = (double)performanceInfo->minTime[1] / (double)frequencyCount.QuadPart;
 
 
-			fwprintf_s(fp, L"%d, %s,%.6lf§Á, %.6lf§Á, %.6lf§Á, %lld\n", pThreadPerformanceSample->mThreadId, iter.first, avgTime, maxTime, minTime, performanceInfo->callCount);
-
+			fwprintf_s(fp, L"%d, %s,%.6lf§Á, %.6lf§Á, %.6lf§Á, %lld\n", pThreadPerformanceSample->mThreadId, iter.first, avgTime, maxTime, minTime, performanceInfo->callCount-2);
 		}
+
+		fwprintf_s(fp, L"\n");
+
+		ReleaseSRWLockExclusive(&pThreadPerformanceSample->mSrwLock);
 	}
 
 	// ÆÄÀÏ ´Ý±â.

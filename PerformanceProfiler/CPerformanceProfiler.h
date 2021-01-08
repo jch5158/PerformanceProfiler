@@ -46,6 +46,8 @@ private:
 	{
 		DWORD mThreadId;
 
+		SRWLOCK mSrwLock;
+
 		std::unordered_map<WCHAR*, CPerformanceProfiler::stPerformanceInfo*> mPerformanceInfoMap;
 	};
 

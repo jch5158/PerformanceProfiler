@@ -6,6 +6,7 @@
 #include <iostream>
 #include <locale.h>
 #include <time.h>
+#include <process.h>
 #include <unordered_map>
 #include <vector>
 

@@ -179,8 +179,9 @@ bool CPerformanceProfiler::FreePerformanceProfiler()
 		return false;
 	}
 
-	auto threadIter = mThreadPerformanceSampleArray.begin();
-	for(int index = 0; index < mThreadPerformanceSampleArray.size();)
+	auto threadIterE = mThreadPerformanceSampleArray.end();
+
+	for(auto threadIter = mThreadPerformanceSampleArray.begin(); threadIter != threadIterE; ++threadIter)
 	{
 		if (*threadIter == nullptr)
 		{
@@ -198,10 +199,7 @@ bool CPerformanceProfiler::FreePerformanceProfiler()
 			iter = pPerformanceInfoMap->erase(iter);
 		}	
 
-
 		delete *threadIter;
-
-		mThreadPerformanceSampleArray.erase(threadIter);
 	}
 
 	mThreadPerformanceSampleArray.clear();

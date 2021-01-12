@@ -4,8 +4,6 @@
 
 //#define FUNCTION_COUNT 100
 
-#define dfTITLE_LENGTH 200
-
 
 class CPerformanceProfiler
 {
@@ -17,7 +15,7 @@ public:
 
 	static bool PrintPerformance(void);
 
-	static bool SetPerformanceProfiler(const WCHAR* pTitle, int threadCount);
+	static bool SetPerformanceProfiler(int threadCount);
 
 	static bool FreePerformanceProfiler(void);
 
@@ -63,13 +61,10 @@ private:
 
 	static bool freeTlsIndex(void);
 
-	static void setLogTitle(WCHAR* pLogTitle);
 	
 	WCHAR* mFunctionName;
 
 	static std::vector<stThreadPerformanceSample*> mThreadPerformanceSampleArray;
 
 	static int mTlsIndex;
-
-	static WCHAR *mTitle;
 };

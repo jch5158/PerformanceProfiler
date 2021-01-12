@@ -5,8 +5,6 @@
 
 int CPerformanceProfiler::mTlsIndex = -1;
 
-WCHAR* CPerformanceProfiler::mTitle = nullptr;
-
 std::vector<CPerformanceProfiler::stThreadPerformanceSample*> CPerformanceProfiler::mThreadPerformanceSampleArray;
 
 
@@ -142,7 +140,7 @@ bool CPerformanceProfiler::setTlsIndex(void)
 	return true;
 }
 
-bool CPerformanceProfiler::SetPerformanceProfiler(const WCHAR* pTitle, int threadCount)
+bool CPerformanceProfiler::SetPerformanceProfiler(int threadCount)
 {
 	if (setTlsIndex() == false)
 	{
@@ -150,8 +148,6 @@ bool CPerformanceProfiler::SetPerformanceProfiler(const WCHAR* pTitle, int threa
 	}
 
 	mThreadPerformanceSampleArray.resize(threadCount);
-
-	mTitle = (WCHAR*)pTitle;
 
 	return true;
 }
@@ -212,25 +208,6 @@ bool CPerformanceProfiler::FreePerformanceProfiler()
 }
 
 
-void CPerformanceProfiler::setLogTitle(WCHAR* pLogTitle)
-{
-	tm nowTime = { 0, };
-
-	__time64_t time64 = NULL;
-
-	errno_t retval;
-
-	// 시스템 클록에 따라 자정 (00:00:00), 1970 년 1 월 1 일 Utc (협정 세계시) 이후 경과 된 시간 (초)을 반환 합니다.
-	_time64(&time64);
-
-	// time_t 값으로 저장 된 시간을 변환 하 고 결과를 tm형식의 구조에 저장 합니다.
-	retval = _localtime64_s(&nowTime, &time64);
-
-	StringCchPrintfW(pLogTitle, dfTITLE_LENGTH, L"[%s Profile]_[%d-%02d-%02d_%02d-%02d-%02d].csv", mTitle,nowTime.tm_year + 1900, nowTime.tm_mon + 1, nowTime.tm_mday, nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec);
-	
-	return;
-}
-
 
 bool CPerformanceProfiler::PrintPerformance(void)
 {
@@ -238,13 +215,9 @@ bool CPerformanceProfiler::PrintPerformance(void)
 
 	QueryPerformanceFrequency(&frequencyCount);
 
-	WCHAR pLogTitle[dfTITLE_LENGTH] = { 0, };
-
-	setLogTitle(pLogTitle);
-
 	FILE* fp = nullptr;
 
-	_wfopen_s(&fp, pLogTitle, L"a+t");
+	_wfopen_s(&fp, L"profiler.csv", L"a+t");
 	if (fp == nullptr)
 	{
 		return false;

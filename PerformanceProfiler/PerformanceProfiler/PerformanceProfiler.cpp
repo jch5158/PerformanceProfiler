@@ -53,7 +53,7 @@ int wmain()
 
 	HANDLE handle[2] = { 0, };
 
-	CPerformanceProfiler::SetPerformanceProfiler(L"TEST", 2);
+	CPerformanceProfiler::SetPerformanceProfiler(2);
 
 	handle[0] = (HANDLE)_beginthreadex(NULL, 0, WorkerThread1, 0, 0, 0);
 

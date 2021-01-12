@@ -2,9 +2,8 @@
 
 #pragma comment(lib,"Winmm.lib")
 
-#include <strsafe.h>
-#include <iostream>
 #include <Windows.h>
+#include <iostream>
 #include <locale.h>
 #include <time.h>
 #include <process.h>

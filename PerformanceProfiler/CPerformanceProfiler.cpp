@@ -149,9 +149,9 @@ bool CPerformanceProfiler::SetPerformanceProfiler(const WCHAR* pTitle, int threa
 		return false;
 	}
 
-	mThreadPerformanceSampleArray.resize(threadCount);
-
 	mTitle = (WCHAR*)pTitle;
+
+	mThreadPerformanceSampleArray.resize(threadCount);
 
 	return true;
 }

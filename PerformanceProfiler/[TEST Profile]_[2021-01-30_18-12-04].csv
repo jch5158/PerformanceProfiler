@@ -1,0 +1,5 @@
+Thread ID,FunctionName,Average,Max,Min,Call 
+3404, TimeFunc1,0.020119§Á, 0.021006§Á, 0.020029§Á, 145
+
+12232, TimeFunc2,0.029821§Á, 0.031083§Á, 0.030037§Á, 98
+

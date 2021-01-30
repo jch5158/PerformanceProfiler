@@ -1,10 +1,13 @@
 #pragma once
 
-//#define FUNCTION_NAME_SIZE 50
+#pragma comment(lib,"Winmm.lib")
 
-//#define FUNCTION_COUNT 100
-
-#define dfTITLE_LENGTH 200
+#include <strsafe.h>
+#include <iostream>
+#include <Windows.h>
+#include <time.h>
+#include <unordered_map>
+#include <vector>
 
 
 class CPerformanceProfiler
@@ -67,9 +70,10 @@ private:
 	
 	WCHAR* mFunctionName;
 
-	static std::vector<stThreadPerformanceSample*> mThreadPerformanceSampleArray;
+	inline static int mTlsIndex = -1;
 
-	static int mTlsIndex;
+	inline static WCHAR* mTitle = nullptr;
 
-	static WCHAR *mTitle;
+	inline static std::vector<stThreadPerformanceSample*> mThreadPerformanceSampleArray;
+
 };

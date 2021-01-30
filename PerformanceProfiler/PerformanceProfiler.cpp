@@ -1,5 +1,6 @@
-﻿#include "stdafx.h"
-#include "CPerformanceProfiler.h"
+﻿#include "CPerformanceProfiler.h"
+#include <locale.h>
+#include <process.h>
 
 void TimeFunc1()
 {

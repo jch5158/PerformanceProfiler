@@ -1,14 +1,12 @@
-#include "stdafx.h"
 #include "CPerformanceProfiler.h"
 
 
-
-int CPerformanceProfiler::mTlsIndex = -1;
-
-WCHAR* CPerformanceProfiler::mTitle = nullptr;
-
-std::vector<CPerformanceProfiler::stThreadPerformanceSample*> CPerformanceProfiler::mThreadPerformanceSampleArray;
-
+//int CPerformanceProfiler::mTlsIndex = -1;
+//
+//WCHAR* CPerformanceProfiler::mTitle = nullptr;
+//
+//std::vector<CPerformanceProfiler::stThreadPerformanceSample*> CPerformanceProfiler::mThreadPerformanceSampleArray;
+//
 
 CPerformanceProfiler::CPerformanceProfiler(const WCHAR* funcName)
 {
@@ -226,7 +224,7 @@ void CPerformanceProfiler::setLogTitle(WCHAR* pLogTitle)
 	// time_t 값으로 저장 된 시간을 변환 하 고 결과를 tm형식의 구조에 저장 합니다.
 	retval = _localtime64_s(&nowTime, &time64);
 
-	StringCchPrintfW(pLogTitle, dfTITLE_LENGTH, L"[%s Profile]_[%d-%02d-%02d_%02d-%02d-%02d].csv", mTitle,nowTime.tm_year + 1900, nowTime.tm_mon + 1, nowTime.tm_mday, nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec);
+	StringCchPrintfW(pLogTitle, MAX_PATH, L"[%s Profile]_[%d-%02d-%02d_%02d-%02d-%02d].csv", mTitle,nowTime.tm_year + 1900, nowTime.tm_mon + 1, nowTime.tm_mday, nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec);
 	
 	return;
 }
@@ -238,7 +236,7 @@ bool CPerformanceProfiler::PrintPerformance(void)
 
 	QueryPerformanceFrequency(&frequencyCount);
 
-	WCHAR pLogTitle[dfTITLE_LENGTH] = { 0, };
+	WCHAR pLogTitle[MAX_PATH] = { 0, };
 
 	setLogTitle(pLogTitle);
 

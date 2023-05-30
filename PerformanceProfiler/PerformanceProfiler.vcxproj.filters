@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PCH">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="PerformanceProfiler">
+      <UniqueIdentifier>{751e1a6c-8449-45c4-bce7-315033ce37e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PerformanceProfiler.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PCH</Filter>
+    </ClCompile>
+    <ClCompile Include="CPerformanceProfiler.cpp">
+      <Filter>PerformanceProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="CTLSPerformanceProfiler.cpp">
+      <Filter>PerformanceProfiler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="CPerformanceProfiler.h">
+      <Filter>PerformanceProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="CTLSPerformanceProfiler.h">
+      <Filter>PerformanceProfiler</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
